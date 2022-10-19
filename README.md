@@ -68,7 +68,7 @@ _An authentication provider uses a navigation flow to provide login with many di
 
 Since we do not sever the opener, there is no need to make a `COOP: restrict-properties`'s action irreversible, contrary to `COOP: same-origin` which is enforced definitively, even on redirects.
 
-This make `COOP: restrict-properties` completely transparent, unless it is used for one of the pages directly interacting with each other. we call that the _reversibility_ of `COOP: restrict-properties`.
+This make `COOP: restrict-properties` completely transparent, unless it is used for one two pages directly interacting with each other. we call that the _reversibility_ of `COOP: restrict-properties`.
 
 ## Security interlude on the same-origin policy
 DOM access is not the only thing that is gated behind same-origin restrictions. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with such checks. Some points worthy of attention:
@@ -77,17 +77,18 @@ DOM access is not the only thing that is gated behind same-origin restrictions. 
 * For similar reasons name targeting does not work across pages with `COOP: restrict-properties`, unless they also share their top-level origin.
 * Javascript navigations are a big NO. They mean executing arbitrary javascript within the target frame. There should be no way to navigate a frame across the `COOP: restrict-properties` boundary given the restrictions above are put in place.
 
-# COOP: restrict-properties and subframes opening popup
+## COOP: restrict-properties and subframes opening popup
 
-## The window name problem
+## The window.name problem
 
 
-## Interactions with COOP reporting
+## Notes on COOP: restrict-properties reporting
 The COOP infrastructure can be used to report access to cross-origin properties that would not be postMessage nor closed. As for usual COOP reporting, DOM access that become restricted will not be able to be reported, and only cross-origin available properties other than postMessage or closed will be reported.
 
 This is a fundamental limitation, because reporting synchronous DOM access would require a check on every Javascript access that would have unacceptable performance impact.
 
-## Additional long term goal, be a default candidate.
+## COOP: restrict-properties as a default candidate
+
 
 
 ## Stakeholder Feedback / Opposition
