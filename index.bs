@@ -1,0 +1,254 @@
+<!--
+ -*- vim: set filetype=html:
+ -*- vim: set colorcolumn=80:
+ -*- vim: set tw=80:
+!-->
+<pre class="metadata">
+Title: Anonymous iframe
+Status: CG-DRAFT
+Group: WICG
+URL: https://wicg.github.io/anonymous-iframe/
+Repository: WICG/anonymous-iframe
+Shortname: anonymous-iframe
+Level: 1
+Editor: Arthur Sonzogni, Google, arthursonzogni@google.com
+Editor: Camille Lamy, Google, clamy@google.com
+Abstract:
+  Anonymous iframe give developers a way to load documents in third party iframe
+  using new and ephemeral context. In return, the
+  [Cross-Origin-Embedder-Policy](https://wicg.github.io/cross-origin-embedder-policy/)
+  (COEP) embedding rules can be lifted.
+
+  This way, developers using COEP can now embed third party iframes that do not.
+Indent: 2
+Work Status: exploring
+Boilerplate: omit conformance
+Markup Shorthands: css off, markdown on
+WPT Display: inline
+WPT Path Prefix: html/anonymous-iframe/
+
+!Tests: <a href=https://github.com/w3c/web-platform-tests/tree/master/html/anonymous-iframe>web-platform-tests html/anonymous-iframe/</a> (<a href=https://github.com/w3c/web-platform-tests/labels/html/anonymous-iframe>ongoing work</a>)
+</pre>
+<pre boilerplate="copyright">&copy;2022, Google, Inc. All rights reserved.</pre>
+
+<pre class="biblio">
+{
+  "spectre": {
+    "authors": [
+      "Paul Kocher",
+      "Jann Horn",
+      "Anders Fogh",
+      "Daniel Genkin",
+      "Daniel Gruss",
+      "Werner Haas",
+      "Mike Hamburg",
+      "Moritz Lipp",
+      "Stefan Mangard",
+      "Thomas Prescher",
+      "Michael Schwarz",
+      "Yuval Yarom"
+    ],
+    "href": "https://spectreattack.com/spectre.pdf",
+    "title": "Spectre Attacks: Exploiting Speculative Execution"
+  },
+
+  "Cookies": {
+    "authors": [
+      "Mike West",
+      "John Wilander"
+    ],
+    "title": "Cookies: HTTP State Management Mechanism",
+    "href": "https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-07"
+  },
+
+  "CHIPS": {
+    "authors": [
+      "Dylan Cutler",
+      "Kaustubha Govind"
+    ],
+    "title": "CHIPS (Cookies Having Independent Partitioned State)",
+    "href": "https://github.com/WICG/CHIPS"
+  },
+
+  "COEP-require-corp": {
+    "authors": [
+      "Mike West"
+    ],
+    "href": "https://wicg.github.io/cross-origin-embedder-policy/",
+    "title": "COEP"
+  },
+
+  "COEP-credentialless": {
+    "authors": [
+      "Arthur Sonzogni",
+      "Camille Lamy",
+      "Ian Clelland", 
+      "Mike West"
+    ],
+    "href": "https://wicg.github.io/cross-origin-embedder-policy/",
+    "title": "COEP: credentialless"
+  },
+
+  "WhyCoopCoep": {
+    "authors": [
+      "Eiji Kitamura",
+      "Demenic Denicola"
+    ],
+    "href": "https://web.dev/why-coop-coep/",
+    "title": "Why you need \"cross-origin isolated\" for powerful features"
+  },
+
+  "StoragePartition": {
+    "title": "Client-Side Storage Partitioning",
+    "href": "https://privacycg.github.io/storage-partitioning/"
+  },
+
+  "STORAGE": {
+    "title": "Storage",
+    "href": "https://storage.spec.whatwg.org/"
+  },
+
+  "SecurityPrivacyQuestionnaire": {
+    "authors": [
+      "Theresa O’Connor",
+      "Pete Snyder",
+      "Jason Novak",
+      "Lukasz Olejnik",
+      "Mike West"
+    ],
+    "title": "Self-Review Questionnaire: Security and Privacy",
+    "href": "https://www.w3.org/TR/security-privacy-questionnaire/"
+  }
+}
+</pre>
+
+<pre class="anchors">
+urlPrefix: https://tc39.es/ecma262/; spec: ECMAScript
+  text: SharedArrayBuffer; type: interface; url: sec-sharedarraybuffer-objects
+
+urlPrefix: https://html.spec.whatwg.org/C/; spec: html
+  text: BroadcastChannel; type:dfn; url:broadcasting-to-other-browsing-contexts
+  text: COEP; type: dfn; url: coep
+  text: COOP; type: dfn; url: cross-origin-opener-policies
+  text: Cross-Origin-Embedder-Policy; type: dfn; url: coep
+  text: Cross-Origin-Opener-Policy; type: dfn; url: cross-origin-opener-policies
+  text: HTMLIframeElement; type:dfn; url:HTMLIframeElement
+  text: ServiceWorker; type:dfn; url:service-worker-obj
+  text: SharedWorker; type:dfn; url:sharedworer
+  text: about:blank; type:dfn; url:about:blank
+  text: bc-container-document; type: dfn; url: bc-container-document
+  text: bc-container; type:dfn; url:bc-container
+  text: check a navigation response's adherence to its embedder policy; type:dfn; url:check-a-navigation-response's-adherence-to-its-embedder-policy
+  text: compatible with cross-origin isolation; type: dfn; url:compatible-with-cross-origin-isolation
+  text: concept-document-bc; type:dfn; url:concept-document-bc
+  text: concept-document-origin; type:dfn; url:concept-document-origin
+  text: concept-document-policy-container; type: dfn; url: concept-document-policy-container
+  text: creating a new browsing context; type:dfn; url:creating-a-new-browsing-context
+  text: crossOriginIsolated; type:dfn; url:concept-settings-object-cross-origin-isolated-capability
+  text: embedder-policy-report-only-reporting-endpoint; type: dfn; url: embedder-policy-report-only-reporting-endpoint
+  text: embedder-policy-report-only-value; type: dfn; url: embedder-policy-report-only-value
+  text: embedder-policy-reporting-endpoint; type: dfn; url: embedder-policy-reporting-endpoint
+  text: embedder-policy-value; type:dfn; url:embedder-policy-value
+  text: entry global object; type:dfn; url:entry-global-object
+  text: hh-replace; type:dfn; url:hh-replace
+  text: iframe; type:dfn; url:the-iframe-element
+  text: initialize the document object; type:dfn; url:initialise-the-document-object
+  text: is initial about:blank; type:dfn; url:is-initial-about:blank
+  text: navigation params; type:dfn; url:navigation-params
+  text: navigation-params-hh; type:dfn; url:navigation-params-hh
+  text: navigation-params-origin; type:dfn; url:navigation-params-origin
+  text: policy-container-embedder-policy; type: dfn; url: policy-container-embedder-policy
+  text: queue a cross-origin embedder policy inheritance violation; type:dfn; url: queue-a-cross-origin-embedder-policy-inheritance-violation
+  text: still on its initial about:blank document; type:dfn; url:still-on-its-initial-about:blank-document
+  text: window open steps; type:dfn; url:window-open-steps
+  text: concept-environment-id; type:dfn; url:concept-environment-id
+  text: concept-environment-targetting-id; type:dfn; url:concept-environment-targetting-id
+  text: concept-environment-creation-url; type:dfn; url:concept-environment-creation-url
+  text: concept-environment-target-browsing-context; type:dfn; url:concept-environment-target-browsing-context
+  text: navigation-params-reserved-environment; type:dfn; url:navigation-params-reserved-environment
+  text: environment; type:dfn; url:environment
+  text: concept-request-reserved-client; type:dfn; url:concept-request-reserved-client
+  text: concept-environment-active-service-worker; type:dfn; url:concept-environment-active-service-worker
+  text: origin; type:dfn; url:concept-origin
+  text: set up a window environment settings object; type:dfn; url:set-up-a-window-environment-settings-object
+  text: script settings for workers; type:dfn; url:script-:settings-for-workers
+  text: set up a worklet environment settings object; type:dfn; url:set-up-a-worklet-environment-settings-object
+  <!--text: A; type:dfn; url:A-->
+  <!--text: A; type:dfn; url:A-->
+
+urlPrefix: https://fetch.spec.whatwg.org/
+  text: network partition key; type:dfn; url:network-partition-key
+  text: concept-response; type:dfn; url:concept-response
+
+urlPrefix: https://storage.spec.whatwg.org/
+  text: storage key; type:dfn; url:storage-key
+
+urlPrefix: https://dom.spec.whatwg.org/
+  text: EventTarget; type:dfn; url:interface-eventtarget
+
+urlPrefix: https://github.com/w3c/mediacapture-viewport
+  text: getViewPortMedia; type:dfn; url:/issues/1
+
+urlPrefix: https://www.w3.org/TR/hr-time/
+  text: high resolution timers; type:dfn; url:/issues/1#issuecomment-812
+
+urlPrefix: https://webidl.spec.whatwg.org/#LegacyUnenumerableNamedProperties
+  text: LegacyUnenumerableNamedProperties; type:dfn; url:LegacyUnenumerableNamedProperties
+
+urlPrefix: https://tc39.es/ecma262/#sec-execution-contexts
+  text: javascript execution context; type:dfn; url:sec-execution-contexts
+
+text: back/forward cache; type:dfn; url:https://web.dev/bfcache/
+
+text: threat model; type:dfn; url:#threat-model
+
+</pre>
+
+<pre class="link-defaults">
+  spec:fetch; type:dfn; for:/; text:response
+  spec:html; type:dfn; for:/; text:origin
+  spec:html; type:dfn; for:Window; text:browsing context
+  spec:html; type:dfn; for:policy container; text:embedder policy
+  spec:html; type:dfn; text:environment
+  spec:url; type:dfn; for:/; text:url
+</pre>
+
+<style>
+.monkey-patch {
+    padding: .5em;
+    border: thin solid #ddd;
+    border: thin solid 1px;
+    border-radius: .5em;
+    margin: .5em calc(-0.5em - 1px);
+    background-color: rgba(255, 255, 0, 0.03);
+    backdrop-filter: blur(5px);
+    box-shadow: 0px 5px 5px 0px rgba(0, 0, 0, 0.05);
+}
+
+.brief {
+  line-height: 10%;
+}
+
+.customHighlight {
+  padding-top:9px ;
+  padding-bottom:9px ;
+  background-color: rgba(255,255,0,0.3)
+}
+
+</style>
+
+Introduction { #introduction }
+============
+
+<em>This section is not normative.</em>
+
+Recommended readings {#recommended-readings}
+--------------------
+- The [[Spectre]] vulnerability.
+- The [[COEP-require-corp]] and [[COEP-credentialless]] headers.
+- How and why [=Cross-Origin-Opener-Policy=] ([=COOP=]) and
+  [=Cross-Origin-Embedder-Policy=] ([=COEP=]) are granting the
+  [crossOriginIsolated](concept-settings-object-cross-origin-isolated-capability)
+  capability. See [[WhyCoopCoep]].
+
+
