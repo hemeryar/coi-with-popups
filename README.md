@@ -85,7 +85,7 @@ For `COOP: same-origin` we solved this problem by setting no-opener on any popup
 ## The window.name problem
 When we navigate to a `COOP: restrict-properties` page and then to a `COOP: unsafe-none` page, we need to make sure no state remains from the previous context, to limit XS-Leaks. `Window.name` can be set by a `crossOriginIsolated` page and it would expose information to the next site if we don't do anything.
 
-We could clear the window name but that would break the reversability characteristic. We could make it immutable for `COOP: restrict-properties` contexts, but that risks breaking iframes to main frame named targeting. Finally we could make it so that names are constant across a `COOP: restrict-properties` boundary, making the changes invisible to other contexts.
+We could clear the window name but that would break the reversability characteristic. We could make it immutable for `COOP: restrict-properties` contexts, but that risks breaking thins for groups of same-origin pages doing legitimate named targeting. Finally we could make it so that names are constant across a `COOP: restrict-properties` boundary, making the changes invisible to other contexts.
 
 TODO: Decide what to do here.
 
