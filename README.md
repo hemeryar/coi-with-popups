@@ -3,10 +3,10 @@
 This repository is dedicated to finding solutions to the cross-origin isolation with popups problem.
 
 ## Authors:
-- @hemeryar
+[Arthur Hemery](https://github.com/hemeryar)
 
-## Participate
-- https://github.com/whatwg/html/issues/6364
+## To Participate
+https://github.com/whatwg/html/issues/6364
 
 ## Table of Contents [if the explainer is longer than one printed page]
 
@@ -42,7 +42,7 @@ Instead of completely removing the opener, we propose having a new `COOP` value,
 We widen the usefulness of `COOP: restrict-properties` by also limiting cross-origin accesses to a very limited set of properties: {`window.closed` and `window.postMessage()`}. This is base on metrics research that shows that the overwhelming majority of sites only uses these two properties when interacting with cross-origin popups. This prevents almost all `WindowProxy` XS-Leaks.
 
 ## COOP: restrict-properties and other values
-`COOP` works by comparing values and producing a decision about what to do with an opener. We propose that:
+`COOP` works by comparing values and producing a decision about what to do with the opener. We propose that:
 
 A page with `COOP: restrict-properties` can navigate to or open:
 * same-origin `COOP: restrict-properties` with a full opener.
@@ -71,15 +71,23 @@ Since we do not sever the opener, there is no need to make a `COOP: restrict-pro
 This make `COOP: restrict-properties` completely transparent, unless it is used for one two pages directly interacting with each other. we call that the _reversibility_ of `COOP: restrict-properties`.
 
 ## Security interlude on the same-origin policy
-DOM access is not the only thing that is gated behind same-origin restrictions. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with such checks. Some points worthy of attention:
+Our proposal creates an unprecedented possibility: that two same-origin documents can reach one another but not have DOM access. However DOM access is not the only thing that is gated behind same-origin restrictions. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with such checks. Some points worthy of attention:
 
 * The location object is quite sensitive and many of its methods/members are same-origin only. It is purposefully excluded from the list of allowed attributes by `restrict-properties`. We do not think we should allow a normal page to navigate a `crossOriginIsolated` page.
 * For similar reasons name targeting does not work across pages with `COOP: restrict-properties`, unless they also share their top-level origin.
 * Javascript navigations are a big NO. They mean executing arbitrary javascript within the target frame. There should be no way to navigate a frame across the `COOP: restrict-properties` boundary given the restrictions above are put in place.
 
 ## COOP: restrict-properties and subframes opening popup
+What happens when an iframe in a `COOP` page opens a popup? The initial empty document created always inherits the origin of the iframe, while we would like `COOP` to be inherited from the top-level document. This can create dangerous discrepencies where we end up with a `crossOriginIsolated` initial empty document of an arbitrary origin.
+
+For `COOP: same-origin` we solved this problem by setting no-opener on any popup opened from an iframe that is cross-origin to its top-level document. We do the same for `COOP: restrict-properties`.
 
 ## The window.name problem
+When we navigate to a `COOP: restrict-properties` page and then to a `COOP: unsafe-none` page, we need to make sure no state remains from the previous context, to limit XS-Leaks. `Window.name` can be set by a `crossOriginIsolated` page and it would expose information to the next site if we don't do anything.
+
+We could clear the window name but that would break the reversability characteristic. We could make it immutable for `COOP: restrict-properties` contexts, but that risks breaking iframes to main frame named targeting. Finally we could make it so that names are constant across a `COOP: restrict-properties` boundary, making the changes invisible to other contexts.
+
+TODO: Decide what to do here.
 
 
 ## Notes on COOP: restrict-properties reporting
@@ -87,8 +95,11 @@ The COOP infrastructure can be used to report access to cross-origin properties 
 
 This is a fundamental limitation, because reporting synchronous DOM access would require a check on every Javascript access that would have unacceptable performance impact.
 
-## COOP: restrict-properties as a default candidate
-
+## Stretch - COOP: restrict-properties as a default candidate
+Given the properties that we have developed in this explainer, we believe `COOP: restrict-properties` could, in the future, make a candidate to replace `COOP: unsafe-none` as a default. Some design decisions were also made to make it as plausible as possible. Some consequences of making it default would be:
+* Most cross-origin properties are inaccessible to and from cross-origin popups, unless you manually set `COOP: unsafe-none`.
+* Pages would only have to manually set `COEP` to be `crossOriginIsolated`.
+* Popups opened from cross-origin iframes would always be no-opener, unless `COOP: unsafe-none` or `COOP: same-origin-allow-popups` is specified.
 
 
 ## Stakeholder Feedback / Opposition
@@ -102,13 +113,4 @@ This is a fundamental limitation, because reporting synchronous DOM access would
 [If appropriate, explain the reasons given by other implementors for their concerns.]
 
 ## References & acknowledgements
-
-[Your design will change and be informed by many people; acknowledge them in an ongoing way! It helps build community and, as we only get by through the contributions of many, is only fair.]
-
-[Unless you have a specific reason not to, these should be in alphabetical order.]
-
-Many thanks for valuable feedback and advice from:
-
-- [Person 1]
-- [Person 2]
-- [etc.]
+Many thanks for valuable feedback and advice from: Alex Moshchuk, [Anne VK](https://github.com/annevk), [Arthur Janc](https://github.com/arturjanc), [Camille Lamy](https://github.com/camillelamy), [Charlie Reis](https://github.com/csreis), [David Dworken](https://github.com/ddworken).
