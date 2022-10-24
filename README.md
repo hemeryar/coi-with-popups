@@ -1,4 +1,4 @@
-# Cross-Origin isolation with popups explainer
+# Cross-Origin isolation with popups
 
 This repository is dedicated to finding solutions to the cross-origin isolation with popups problem.
 
