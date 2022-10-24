@@ -103,7 +103,7 @@ Instead, when doing a restricted swap, we get a fresh name if that's for a conte
 
 </br>
 
-![image](resources/name.png)  
+![image](resources/name.jpg)  
 _In that example all the documents with origin A.com can set and target the window.name property. It is in a different context from the B.com's page, so we stash the name when navigating. B.com free to set its own name and use it in its context. When we navigate back to A.com we reuse the stashed name._
 
 </br>
