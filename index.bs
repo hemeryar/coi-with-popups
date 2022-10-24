@@ -37,41 +37,12 @@ Markup Shorthands: css off, markdown on
     "title": "Spectre Attacks: Exploiting Speculative Execution"
   },
 
-  "Cookies": {
-    "authors": [
-      "Mike West",
-      "John Wilander"
-    ],
-    "title": "Cookies: HTTP State Management Mechanism",
-    "href": "https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-07"
-  },
-
-  "CHIPS": {
-    "authors": [
-      "Dylan Cutler",
-      "Kaustubha Govind"
-    ],
-    "title": "CHIPS (Cookies Having Independent Partitioned State)",
-    "href": "https://github.com/WICG/CHIPS"
-  },
-
-  "COEP-require-corp": {
+  "COEP": {
     "authors": [
       "Mike West"
     ],
     "href": "https://wicg.github.io/cross-origin-embedder-policy/",
     "title": "COEP"
-  },
-
-  "COEP-credentialless": {
-    "authors": [
-      "Arthur Sonzogni",
-      "Camille Lamy",
-      "Ian Clelland", 
-      "Mike West"
-    ],
-    "href": "https://wicg.github.io/cross-origin-embedder-policy/",
-    "title": "COEP: credentialless"
   },
 
   "WhyCoopCoep": {
@@ -161,13 +132,6 @@ urlPrefix: https://html.spec.whatwg.org/C/; spec: html
   <!--text: A; type:dfn; url:A-->
   <!--text: A; type:dfn; url:A-->
 
-urlPrefix: https://fetch.spec.whatwg.org/
-  text: network partition key; type:dfn; url:network-partition-key
-  text: concept-response; type:dfn; url:concept-response
-
-urlPrefix: https://storage.spec.whatwg.org/
-  text: storage key; type:dfn; url:storage-key
-
 urlPrefix: https://dom.spec.whatwg.org/
   text: EventTarget; type:dfn; url:interface-eventtarget
 
@@ -235,5 +199,6 @@ Recommended readings {#recommended-readings}
   [=Cross-Origin-Embedder-Policy=] ([=COEP=]) are granting the
   [crossOriginIsolated](concept-settings-object-cross-origin-isolated-capability)
   capability. See [[WhyCoopCoep]].
+
 
 
