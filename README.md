@@ -10,9 +10,23 @@ https://github.com/whatwg/html/issues/6364
 
 ## Table of Contents
 
-[You can generate a Table of Contents for markdown documents using a tool like [doctoc](https://github.com/thlorenz/doctoc).]
-
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Terminology](#terminology)
+- [Motivations](#motivations)
+- [Why does crossOriginIsolated require COOP: same-origin](#why-does-crossoriginisolated-require-coop-same-origin)
+- [The COOP: restrict-properties proposal](#the-coop-restrict-properties-proposal)
+- [COOP: restrict-properties and other values](#coop-restrict-properties-and-other-values)
+- [Typical use case & the reversability characteristic](#typical-use-case--the-reversability-characteristic)
+- [Security interlude on the same-origin policy](#security-interlude-on-the-same-origin-policy)
+- [COOP: restrict-properties and subframes opening popup](#coop-restrict-properties-and-subframes-opening-popup)
+- [The window.name problem](#the-windowname-problem)
+- [Notes on COOP: restrict-properties reporting](#notes-on-coop-restrict-properties-reporting)
+- [Stretch - COOP: restrict-properties as a default candidate](#stretch---coop-restrict-properties-as-a-default-candidate)
+- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+- [References & acknowledgements](#references--acknowledgements)
+
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
