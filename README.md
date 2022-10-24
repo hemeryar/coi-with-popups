@@ -8,7 +8,7 @@ This repository is dedicated to finding solutions to the cross-origin isolation 
 ## To Participate
 https://github.com/whatwg/html/issues/6364
 
-## Table of Contents [if the explainer is longer than one printed page]
+## Table of Contents
 
 [You can generate a Table of Contents for markdown documents using a tool like [doctoc](https://github.com/thlorenz/doctoc).]
 
@@ -83,11 +83,16 @@ What happens when an iframe in a `COOP` page opens a popup? The initial empty do
 For `COOP: same-origin` we solved this problem by setting no-opener on any popup opened from an iframe that is cross-origin to its top-level document. We do the same for `COOP: restrict-properties`.
 
 ## The window.name problem
-When we navigate to a `COOP: restrict-properties` page and then to a `COOP: unsafe-none` page, we need to make sure no state remains from the previous context, to limit XS-Leaks. `Window.name` can be set by a `crossOriginIsolated` page and it would expose information to the next site if we don't do anything.
+When we navigate to a `COOP: restrict-properties` page and then to a `COOP: unsafe-none` page, we need to make sure no state remains from the previous context, to limit XS-Leaks. `Window.name` can be set by a `crossOriginIsolated` page and it could expose information to the next site.
 
-We could clear the window name but that would break the reversability characteristic. We could make it immutable for `COOP: restrict-properties` contexts, but that risks breaking thins for groups of same-origin pages doing legitimate named targeting. Finally we could make it so that names are constant across a `COOP: restrict-properties` boundary, making the changes invisible to other contexts.
+Instead, when doing a restricted swap, we get a fresh name if that's for a context we haven't seen yet, or reuse the `window.name` property that was set for that frame in that context. Each window has a separate name in all the different contexts.
 
-TODO: Decide what to do here.
+</br>
+
+![image](resources/name.png)  
+_In that example all the documents with origin A.com can set and target the window.name property. It is in a different context from the B.com's page, so we stash the name when navigating. B.com free to set its own name and use it in its context. When we navigate back to A.com we reuse the stashed name._
+
+</br>
 
 
 ## Notes on COOP: restrict-properties reporting
@@ -104,13 +109,9 @@ Given the properties that we have developed in this explainer, we believe `COOP:
 
 ## Stakeholder Feedback / Opposition
 
-[Implementors and other stakeholders may already have publicly stated positions on this work. If you can, list them here with links to evidence as appropriate.]
-
-- [Implementor A] : Positive
-- [Stakeholder B] : No signals
-- [Implementor C] : Negative
-
-[If appropriate, explain the reasons given by other implementors for their concerns.]
+- Firefox: No Signals
+- Safari: No Signals
+- TAG: Ongoing review in https://github.com/w3ctag/design-reviews/issues/760
 
 ## References & acknowledgements
-Many thanks for valuable feedback and advice from: Alex Moshchuk, [Anne VK](https://github.com/annevk), [Arthur Janc](https://github.com/arturjanc), [Camille Lamy](https://github.com/camillelamy), [Charlie Reis](https://github.com/csreis), [David Dworken](https://github.com/ddworken).
+Many thanks for valuable feedback and advice from: Alex Moshchuk, [Anne VK](https://github.com/annevk), [Artur Janc](https://github.com/arturjanc), [Camille Lamy](https://github.com/camillelamy), [Charlie Reis](https://github.com/csreis), [David Dworken](https://github.com/ddworken).
