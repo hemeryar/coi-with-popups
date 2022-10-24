@@ -1,6 +1,6 @@
 # coop-with-popups
 
-This repository is being used for work in the W3C coop-with-popups, governed by the [W3C Community License
+This repository is being used for work in the W3C coi-with-popups, governed by the [W3C Community License
 Agreement (CLA)](http://www.w3.org/community/about/agreements/cla/). To make substantive contributions,
 you must join the CG.
 

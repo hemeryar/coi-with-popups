@@ -1,34 +1,19 @@
-<!--
- -*- vim: set filetype=html:
- -*- vim: set colorcolumn=80:
- -*- vim: set tw=80:
-!-->
 <pre class="metadata">
 Title: Anonymous iframe
-Status: CG-DRAFT
-Group: WICG
-URL: https://wicg.github.io/anonymous-iframe/
-Repository: WICG/anonymous-iframe
-Shortname: anonymous-iframe
+Status: 
+ED: https://github.com/hemeryar/coi-with-popups
+Repository: https://github.com/hemeryar/coi-with-popups
+Shortname: coi-with-popups
 Level: 1
-Editor: Arthur Sonzogni, Google, arthursonzogni@google.com
-Editor: Camille Lamy, Google, clamy@google.com
+Editor: Arthur Hemery, Google, ahemery@google.com
 Abstract:
-  Anonymous iframe give developers a way to load documents in third party iframe
-  using new and ephemeral context. In return, the
-  [Cross-Origin-Embedder-Policy](https://wicg.github.io/cross-origin-embedder-policy/)
-  (COEP) embedding rules can be lifted.
-
-  This way, developers using COEP can now embed third party iframes that do not.
+  This proposal explores a new Cross-Origin-Opener-Policy value, "restrict-properties",
+  that would enable crossOriginIsolated while preserving cross-origin popup access.
 Indent: 2
 Work Status: exploring
-Boilerplate: omit conformance
+Warning: not ready
 Markup Shorthands: css off, markdown on
-WPT Display: inline
-WPT Path Prefix: html/anonymous-iframe/
 
-!Tests: <a href=https://github.com/w3c/web-platform-tests/tree/master/html/anonymous-iframe>web-platform-tests html/anonymous-iframe/</a> (<a href=https://github.com/w3c/web-platform-tests/labels/html/anonymous-iframe>ongoing work</a>)
-</pre>
 <pre boilerplate="copyright">&copy;2022, Google, Inc. All rights reserved.</pre>
 
 <pre class="biblio">
