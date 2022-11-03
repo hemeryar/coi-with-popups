@@ -41,7 +41,7 @@ This proposal main goal to be able to enable `window.crossOriginIsolated` for pa
 A secondary objective is to build on the solution to improve security against XS-Leaks in general, by making a solution that could be suitable to a wide.
 
 ## Why does crossOriginIsolated require COOP: same-origin
-For a page to be `crossOriginIsolated`, we need to be able to put it in its own process. This is the only thing that guarantees that the browser can actually make a page safe following Spectre. For a browser being "able to" means not breaking specifications, and in particular not restricting DOM scripting, which is impossible across processes. `COOP: same-origin` was designed to disable that capability for popups.
+Because of [Spectre](https://spectreattack.com/), OS processs are now the only strong security boundary. `crossOriginIsolated` makes Spectre easier to exploit via powerful APIs, so we need to be able to put `crossOriginIsolated` pages in their own process. To be able to honor that, we cannot allow synchronous scripting to popups. `COOP: same-origin` was designed to sever the opener for that reason.
 
 </br>
 
@@ -51,9 +51,9 @@ _The basic case COOP solves. Without COOP, we have to put all the documents in t
 </br>
 
 ## The COOP: restrict-properties proposal
-Instead of completely removing the opener, we propose having a new `COOP` value, `restrict-properties` that only restricts the access of same-origin documents that do not share this `COOP` header value as well as top-level origin. In the above case, if the opener has `COOP: restrict-properties`, we do not allow access of the iframe to the newly opened popup. This makes it possible to put the two pages in different processes, and to enable `crossOriginIsolated` on the first page, as long as it also sets `COEP`.
+Instead of completely removing the opener, we propose merely restricting synchronous access. This would be done via a new `COOP` value, `restrict-properties` that would only allow access to asynchronous properties. In the above case, if the opener has `COOP: restrict-properties`, we do not allow access of the iframe to the newly opened popup. This makes it possible to put the two pages in different processes, and to enable `crossOriginIsolated` on the first page, as long as it also sets `COEP`.
 
-We widen the usefulness of `COOP: restrict-properties` by also limiting cross-origin accesses to a very limited set of properties: {`window.closed` and `window.postMessage()`}. This is base on metrics research that shows that the overwhelming majority of sites only uses these two properties when interacting with cross-origin popups. This prevents almost all `WindowProxy` XS-Leaks.
+We widen the usefulness of `COOP: restrict-properties` by also limiting asynchronous accesses to a very limited set of properties: {`window.closed` and `window.postMessage()`}. This is based on metrics research that shows that the overwhelming majority of sites only uses these two properties when interacting with cross-origin popups. This prevents almost all `WindowProxy` XS-Leaks.
 
 ## COOP: restrict-properties and other values
 `COOP` works by comparing values and producing a decision about what to do with the opener. We propose that:
@@ -85,10 +85,10 @@ Since we do not sever the opener, there is no need to make a `COOP: restrict-pro
 This make `COOP: restrict-properties` completely transparent, unless it is used for one two pages directly interacting with each other. we call that the _reversibility_ of `COOP: restrict-properties`.
 
 ## Security interlude on the same-origin policy
-Our proposal creates an unprecedented possibility: that two same-origin documents can reach one another but not have DOM access. However DOM access is not the only thing that is gated behind same-origin restrictions. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with such checks. Some points worthy of attention:
+Our proposal creates an unprecedented possibility: that two same-origin documents can reach one another but not have full access to each other. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with same-origin checks relying on the assumption of full access. Some points worthy of attention:
 
 * The location object is quite sensitive and many of its methods/members are same-origin only. It is purposefully excluded from the list of allowed attributes by `restrict-properties`. We do not think we should allow a normal page to navigate a `crossOriginIsolated` page.
-* For similar reasons name targeting does not work across pages with `COOP: restrict-properties`, unless they also share their top-level origin.
+* For similar reasons name targeting does not work across pages with `COOP: restrict-properties`.
 * Javascript navigations are a big NO. They mean executing arbitrary javascript within the target frame. There should be no way to navigate a frame across the `COOP: restrict-properties` boundary given the restrictions above are put in place.
 
 ## COOP: restrict-properties and subframes opening popup
