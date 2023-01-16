@@ -37,7 +37,7 @@ https://github.com/whatwg/html/issues/6364
 In this explainer, we call _document_ what is rendered by any individual frame. A _page_ contains the top level document, as well as all of its iframe documents, if any. When you open a popup, you get a second page.
 
 ## Why does crossOriginIsolated require COOP: same-origin
-Because of [Spectre](https://spectreattack.com/), OS processes are now the only strong security boundary. `crossOriginIsolated` makes Spectre easier to exploit via powerful APIs, so we need to be able to put pages that set `crossOriginIsolated` in their own process. To be able to honor that, we used the spec concept of BrowsingContext groups.
+Because of [Spectre](https://spectreattack.com/), OS processes are now the only strong security boundary. `crossOriginIsolated` makes Spectre easier to exploit via powerful APIs, so we need to be able to put `crossOriginIsolated` pages that in their own process. To be able to honor that, we used the spec concept of BrowsingContext groups.
 
 A BrowsingContext belongs to a BrowsingContext group. All documents presented in a BrowsingContext can reach other documents presented in BrowsingContexts in the same BrowsingContext group via javascript. The BrowsingContext group holds a map of (roughly) origins to Agent Clusters. All documents in the same Agent Cluster are same-origin pages that can reach one another, and therefore have synchronous scripting access. They need to be in the same process.
 
@@ -46,17 +46,17 @@ Putting two documents in BrowsingContexts not belonging to the same BrowsingCont
 </br>
 
 ![image](resources/coop_basic_issue.png)  
-_The basic case COOP solves. Without COOP, we have to put all the documents in the same process, because the popup and the iframe are of origin b.com and synchronously script their DOM._
+_The basic case COOP solves. Without COOP, we have to put all the documents in the same process, because the popup and the iframe are of origin b.com. They can synchronously script each other's DOM._
 
 </br>
 
 ## The COOP: restrict-properties proposal
-Instead of completely removing scripting capabilities between two pages, we would like to only restrict synchronous access, which is more precisely what requires pages to be in the same process. For this purpose, we introduce a new superset of BrowsingContext group, the COOP BrowsingContext group (tentative name). Within this new group, all pages have asynchronous access to each other. We end up with the following multi-layer structure:
+Instead of completely removing scripting capabilities between two pages, we would like to only restrict synchronous access, which is more precisely what requires pages to be in the same process. For this purpose, we introduce a new superset of BrowsingContext group, the COOP group (tentative name). Within this new group, pages have asynchronous access to each other. This gives us the following multi-layer structure.
 
 
 </br>
 
-![image](resources/coop_bc_group.jpg)
+![image](resources/coop_group.jpg)
 _In this example, a.com/index and a.com/article have synchronous script access, but can only asynchronously access a.com/login and b.com/oauth. a.com/another-tab has no access to other a.com pages._
 
 </br>
