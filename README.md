@@ -68,24 +68,17 @@ To reduce XS-leaks as much as possible, we reduce asynchronous across-BrowsingCo
 ## Fitting COOP: restrict-properties into current algorithm
 The `COOP` algorithm works by comparing header values and origins to say compute whether or not we should use a new BrowsingContext group. This needs to be opened to an enum return value, containing the following possible outcomes:
 
-1) Stay in the same BrowsingContext group.
-2) Stay in the same COOP BrowsingContext group, but change BrowsingContext group.
-3) Change COOP BrowsingContext group. 
+1. Stay in the same BrowsingContext group.
+2. Stay in the same COOP group, but change BrowsingContext group.
+3. Change COOP BrowsingContext group. 
 
 Current COOP algorithm returns either 1. or 3. Using `COOP: restrict-properties` would yield 2., iff:
 * We are navigating between a page setting `COOP: unsafe-none` from/to a page setting `COOP: restrict-properties`.
 * We are navigating between two pages setting `COOP: restrict-properties`, but that have different origins.
 * We have a opened a fresh popup from a page that set `COOP: same-origin-allow-popups` to a page that sets `COOP: restrict-properties`.
 
-## Security interlude on the same-origin policy
-Our proposal creates an unprecedented possibility: that two same-origin documents can reach one another but not have full access to each other. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with same-origin checks relying on the assumption of full access. Some points worthy of attention:
-
-* The location object is quite sensitive and many of its methods/members are same-origin only. It is purposefully excluded from the list of allowed attributes by `restrict-properties`. We do not think we should allow a normal page to navigate a `crossOriginIsolated` page.
-* For similar reasons name targeting does not work across pages with `COOP: restrict-properties`.
-* Javascript navigations are a big NO. They mean executing arbitrary javascript within the target frame. There should be no way to navigate a frame across the `COOP: restrict-properties` boundary given the restrictions above are put in place.
-
 ## Typical use case & requirement
-Because the ecosystem of popup flows is complex, we want `COOP: restrict-properties` to be as little intrusive as it can be.
+We want `COOP: restrict-properties` to be as little intrusive as possible while providing strong guarantees. Imagine the following use case:
 
 </br>
 
@@ -94,18 +87,29 @@ _An authentication provider uses a navigation flow to provide login with many di
 
 </br>
 
-Since we do not sever the opener, there is no need to make a `COOP: restrict-properties`'s action irreversible, contrary to `COOP: same-origin` which is enforced definitively, even on redirects.
+In the above case, the navigation from auth-provider.com to google.auth.com triggers a BrowsingContext group swap, within the same COOP group. We want to make sure that the subsequent navigation from google.auth.com to auth-provider.com reuses the same BrowsingContext group as the initial auth-provider.com page, to reduce the impact of deploying `COOP: restrict-properties`. We call that the _reversibility_ requirement of `COOP: restrict-properties`.
 
-This make `COOP: restrict-properties` completely transparent, unless it is used for one two pages directly interacting with each other. We call that the _reversibility_ requirement of `COOP: restrict-properties`.
+To be able to do that, the COOP group needs to hold a map of BrowsingContext groups, that they can reuse. This map is keyed by: {isCrossOriginIsolated, hasCoopRestrictProperties, top-level origin or null}. This makes sure that:
 
-## COOP: restrict-properties and subframes opening popup
+* A crossOriginIsolated BrowsingContext group is never reused for another origin, nor for a page that does not set `COEP`.
+* A BrowsingContext group containing pages with `COOP: restrict-properties` is not reused for another origin.
+* All pages without COOP, within a COOP group, live in the same BrowsingContext group.
+
+## Security considerations
+Our proposal creates an unprecedented possibility: that two same-origin documents can reach one another but not have full access to each other. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with same-origin checks relying on the assumption of full access. Some points worthy of attention:
+
+* The location object is quite sensitive and many of its methods/members are same-origin only. It is purposefully excluded from the list of allowed attributes by `restrict-properties`. We do not think we should allow a normal page to navigate a `crossOriginIsolated` page.
+* For similar reasons name targeting does not work across pages with `COOP: restrict-properties`.
+* Javascript navigations are a big NO. They mean executing arbitrary javascript within the target frame. There should be no way to navigate a frame across the `COOP: restrict-properties` boundary given the restrictions above are put in place.
+
+### Cross-origin subframes opening popup
 What happens when an iframe in a `COOP` page opens a popup? The initial empty document created always inherits the origin of the iframe, while we would like `COOP` to be inherited from the top-level document. This can create dangerous discrepencies where we end up with a `crossOriginIsolated` initial empty document of an arbitrary origin.
 
 For `COOP: same-origin` we solved this problem by setting no-opener on any popup opened from an iframe that is cross-origin to its top-level document.
 
 TODO: explain current solution.
 
-## The window.name problem
+### Window.name leakage
 When we navigate to a `COOP: restrict-properties` page and then to a `COOP: unsafe-none` page, we need to make sure no state remains from the previous context, to limit XS-Leaks. `Window.name` can be set by a `crossOriginIsolated` page and it could expose information to the next site.
 
 TODO: explain current solution.
