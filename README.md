@@ -26,7 +26,7 @@ https://github.com/whatwg/html/issues/6364
   - [Same-origin policy](#same-origin-policy)
   - [Cross-origin subframes opening popup](#cross-origin-subframes-opening-popup)
   - [Window.name leakage](#windowname-leakage)
-- [Notes on COOP: restrict-properties reporting](#notes-on-coop-restrict-properties-reporting)
+- [Extra notes on COOP: restrict-properties reporting](#extra-notes-on-coop-restrict-properties-reporting)
 - [Stretch - COOP: restrict-properties as a default candidate](#stretch---coop-restrict-properties-as-a-default-candidate)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
@@ -110,12 +110,10 @@ What happens when an iframe in a `COOP` page opens a popup? The initial empty do
 
 For `COOP: same-origin` we solved this problem by setting no-opener on any popup opened from an iframe that is cross-origin to its top-level document.
 
-TODO: explain current solution.
+Solutions are discussed in the [Cross-origin iframes section](docs/cross_origin_iframe_popup.MD).
 
 ### Window.name leakage
 When we navigate to a `COOP: restrict-properties` page and then to a `COOP: unsafe-none` page, we need to make sure no state remains from the previous context, to limit XS-Leaks. `Window.name` can be set by a `crossOriginIsolated` page and it could expose information to the next site.
-
-TODO: explain current solution.
 
 </br>
 
@@ -124,8 +122,9 @@ _In that example all the documents with origin A.com can set and target the wind
 
 </br>
 
+Solutions are discussed in the [Name leakage section](docs/window_name_across_bcg.MD).
 
-## Notes on COOP: restrict-properties reporting
+## Extra notes on COOP: restrict-properties reporting
 The COOP infrastructure can be used to report access to cross-origin properties that would not be postMessage nor closed. As for usual COOP reporting, DOM access that become restricted will not be able to be reported, and only cross-origin available properties other than postMessage or closed will be reported.
 
 This is a fundamental limitation, because reporting synchronous DOM access would require a check on every Javascript access that would have unacceptable performance impact.
