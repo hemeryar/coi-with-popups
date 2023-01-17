@@ -23,6 +23,7 @@ https://github.com/whatwg/html/issues/6364
 - [Fitting COOP: restrict-properties into current algorithm](#fitting-coop-restrict-properties-into-current-algorithm)
 - [Typical use case & requirement](#typical-use-case--requirement)
 - [Security considerations](#security-considerations)
+  - [Same-origin policy](#same-origin-policy)
   - [Cross-origin subframes opening popup](#cross-origin-subframes-opening-popup)
   - [Window.name leakage](#windowname-leakage)
 - [Notes on COOP: restrict-properties reporting](#notes-on-coop-restrict-properties-reporting)
@@ -96,6 +97,8 @@ To be able to do that, the COOP group needs to hold a map of BrowsingContext gro
 * All pages without COOP, within a COOP group, live in the same BrowsingContext group.
 
 ## Security considerations
+
+### Same-origin policy
 Our proposal creates an unprecedented possibility: that two same-origin documents can reach one another but not have full access to each other. We audited the spec to produce a [list](https://docs.google.com/spreadsheets/d/1e6LakHSKTD22XEYfULUJqUZEdLnzynMaZCefUe1zlRc/) of all places with same-origin checks relying on the assumption of full access. Some points worthy of attention:
 
 * The location object is quite sensitive and many of its methods/members are same-origin only. It is purposefully excluded from the list of allowed attributes by `restrict-properties`. We do not think we should allow a normal page to navigate a `crossOriginIsolated` page.
