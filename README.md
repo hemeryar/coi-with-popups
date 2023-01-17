@@ -12,7 +12,7 @@ This proposal goal is to be able to enable `window.crossOriginIsolated` for page
 ## To Participate
 https://github.com/whatwg/html/issues/6364
 
-## Table of Contents
+# Table of Contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -21,7 +21,7 @@ https://github.com/whatwg/html/issues/6364
 - [Why does crossOriginIsolated require COOP: same-origin](#why-does-crossoriginisolated-require-coop-same-origin)
 - [The COOP: restrict-properties proposal](#the-coop-restrict-properties-proposal)
 - [Fitting COOP: restrict-properties into current algorithm](#fitting-coop-restrict-properties-into-current-algorithm)
-- [Typical use case & requirement](#typical-use-case--requirement)
+- [Extra requirements for common use cases](#extra-requirements-for-common-use-cases)
 - [Security considerations](#security-considerations)
   - [Same-origin policy](#same-origin-policy)
   - [Cross-origin subframes opening popup](#cross-origin-subframes-opening-popup)
@@ -33,6 +33,7 @@ https://github.com/whatwg/html/issues/6364
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+# Introduction and problematics
 
 ## Terminology
 In this explainer, we call _document_ what is rendered by any individual frame. A _page_ contains the top level document, as well as all of its iframe documents, if any. When you open a popup, you get a second page.
@@ -40,14 +41,57 @@ In this explainer, we call _document_ what is rendered by any individual frame. 
 ## Why does crossOriginIsolated require COOP: same-origin
 Because of [Spectre](https://spectreattack.com/), OS processes are now the only strong security boundary. `crossOriginIsolated` makes Spectre easier to exploit via powerful APIs, so we need to be able to put `crossOriginIsolated` pages that in their own process. To be able to honor that, we used the spec concept of BrowsingContext groups.
 
-A BrowsingContext belongs to a BrowsingContext group. All documents presented in a BrowsingContext can reach other documents presented in BrowsingContexts in the same BrowsingContext group via javascript. The BrowsingContext group holds a map of (roughly) origins to Agent Clusters. All documents in the same Agent Cluster are same-origin pages that can reach one another, and therefore have synchronous scripting access. They need to be in the same process.
+A BrowsingContext (roughly a frame) belongs to a BrowsingContext group. All documents presented in a BrowsingContext can reach other documents presented in BrowsingContexts in the same BrowsingContext group via javascript. The BrowsingContext group holds a map of origins to Agent Clusters. All same-origin documents in the same BrowsingContext group are in the same Agent Cluster. They have synchronous scripting access to each other. They need to be in the same process.
 
-Putting two documents in BrowsingContexts not belonging to the same BrowsingContext group makes sure they do not need to be in the same process. `Cross-Origin-Opener-Policy` leverages this mechanism to decide whether or not two pages can be in the same BrowsingContext group.
+Putting two documents in BrowsingContexts not belonging to the same BrowsingContext group makes sure they are not in the same Agent Cluster, therefore that they do not need to be in the same process. `Cross-Origin-Opener-Policy` leverages this mechanism to decide whether or not two pages can be in the same BrowsingContext group.
 
 </br>
 
 ![image](resources/coop_basic_issue.png)  
 _The basic case COOP solves. Without COOP, we have to put all the documents in the same process, because the popup and the iframe are of origin b.com. They can synchronously script each other's DOM._
+
+</br>
+
+## Problematic use cases
+Imagine the following flow:
+
+</br>
+
+![image](resources/auth_flow.jpg)  
+_A user websites uses an identity provider to give people the possibility to login using Google or Facebook. For that, it opens a popup to the provider, which then navigates to the selected authentication website._
+
+</br>
+
+In that case, my-website.com and auth-provider.com communicate via their opener javascript handle to each other. If any of my-website.com, auth-provider.com or auth.google.com sets `COOP: same-origin` to become crossOriginIsolated, a different BrowsingContext group is used, and the opener is immediately cut. The flow is broken.
+
+Another example:
+
+</br>
+
+![image](resources/payment_flow.jpg)  
+_A website embeds an iframe to delegate payment. When needed, the iframe popups up a new window to process the payment. When done, it closes the window._
+
+</br>
+
+Similarly, in that case if either my-website.com or wallet.google.com sets `COOP: same-origin`, the flow is broken.
+
+## An alternative approach
+Let's use the payment example discussed above to see what alternatives approaches could be used.
+
+</br>
+
+![image](resources/no_coop_solution.jpg)  
+_Without COOP, we use a single BrowsingContext group. The iframe and the popup share an Agent Cluster, and they must live in the same process. For browsers that do not support rendering iframes in other processes, everything ends up in the same process._
+
+</br>
+
+![image](resources/coop_solution.jpg)  
+_With COOP, we use two different BrowsingContext groups. The main page and the popup cannot share an Agent Cluster. They can live in different processes, but both synchronous and asynchronous communication is given up._
+
+</br>
+
+![image](resources/coop_rp_solution.jpg)  
+_An idea would be to use a single BrowsingContext group, but to increase the keying of Agent Cluster, to have multiple same-origin documents not be able to synchronously script each other. This would allow for asynchronous communication without synchronous communication._
 
 </br>
 
@@ -78,7 +122,7 @@ Current COOP algorithm returns either 1. or 3. Using `COOP: restrict-properties`
 * We are navigating between two pages setting `COOP: restrict-properties`, but that have different origins.
 * We have a opened a fresh popup from a page that set `COOP: same-origin-allow-popups` to a page that sets `COOP: restrict-properties`.
 
-## Typical use case & requirement
+## Extra requirements for common use cases
 We want `COOP: restrict-properties` to be as little intrusive as possible while providing strong guarantees. Imagine the following use case:
 
 </br>
