@@ -25,3 +25,4 @@ We could use noopener for cross-origin iframes, but that would significantly red
 
 ### COEP and crossOriginIsolated
 ### Permissions Policy
+### Origin and CSP
