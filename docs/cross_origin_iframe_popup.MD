@@ -40,18 +40,16 @@ In the example above, we have multiple top-level origin documents in a BrowsingC
 * Anything that the iframe does is readable by a.com. This is fine because b.com agreed to that by setting COEP. The fresh popup is required to be in-process, and anything done in there can be read by a.com. A.com cannot get any extra information, because the top-level frame has the same restriction as the iframe. It has COEP so it cannot do new embedding, it has the same origin so it cannot do extra fetch, etc.
 * In the other direction, b.com can read a.com if the Permissions-Policy is delegated to the iframe. No inheritance mechanism is planned for opened popups. For this reason we explicitely disable crossOriginIsolated permission on all freshly opened popups.
 
-COOP invariants about top-level origins become invariants about top-level COOP origins. The only case where a page can have a COOP origin not equal to its actual origin is the initial empty document. No capability
+COOP invariants about top-level origins become invariants about top-level COOP origins. The only case where a page can have a COOP origin not equal to its actual origin is the initial empty document. No new capability is added.
 
 </br>
 
-Finally, about a potentially problematic situation:
+Finally, a note about the following situation:
 
 ![image](../resources/coop_inheritance_coep_2.jpg)  
-_COEP gets inherited to the top-level document although its document top-level COEP did not set it. In that case, we would end up with a crossOriginIsolated mismatch._
+_COEP gets inherited to the popup although only the iframe set it and its top-level document did not. The iframe is NOT crossOriginIsolated._
 
-We have a couple of options:
-* Modify the COEP inheritance rule to something like: "Inherit only if all the ancestors also set COEP." When COEP is set without COOP, there is no security implication. Sure the newly opened popup could itself embed non COEP opted-in pages, but wouldn't be able to use the same-process to abuse it. This is suggested one.
-* We could also decide on crossOriginIsolated directly at response time, remove COOP+COEP as a value, and instead use the crossOriginIsolated value in the COOP algorithm. This makes inheriting COOP and COEP from different sources not grant crossOriginIsolated. This solution seems way to complicated to solve this particular problem.
+We've simplified the COOP value in the drawings. In reality it is augmented with COEP when it is received from the network, and used alone in the COOP algorithm. In the above picture it still works as intended, because we're inheriting COOP: "restrict-properties" and not "restrict-properties+COEP".
 
 ### Origin and CSP
 Because we're recording the origin along the COOP value, we need to decide what to do with sandboxing, which can make the origin opaque. The current spec mentions that we first compute the sandboxing flags, both inherited and set via CSP, and then if COOP is also set we go to an error page. It is not clear if the whole process is to be applied to redirects. My understanding is that COOP is enforced but CSP is not, creating a discrepency.
