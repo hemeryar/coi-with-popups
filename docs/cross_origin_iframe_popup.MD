@@ -19,6 +19,8 @@ Our proposal is to supplement the COOP structure with the origin that initially 
 ![image](../resources/coop_inheritance_solution.jpg)  
 _By supplementing COOP with the setting origin, we solve the confusion. In this example, we have two distinct BrowsingContext groups._
 
+</br>
+
 ## Potential alternatives
 * We could query the opener's top-level document origin directly when doing the first navigation. However this could end up being complicated, if popups are nested for example. This would require a more complex algorithm.
 
@@ -36,6 +38,8 @@ COOP and COEP interactions are important because of cross-origin isolation. COEP
 ![image](../resources/coop_inheritance_coep_1.jpg)  
 _COEP gets passed to the initial empty document because the iframe set it._
 
+</br>
+
 In the example above, we have multiple top-level origin documents in a BrowsingContext group that is crossOriginIsolated. We believe this is fine:
 * Anything that the iframe does is readable by a.com. This is fine because b.com agreed to that by setting COEP. The fresh popup is required to be in-process, and anything done in there can be read by a.com. A.com cannot get any extra information, because the top-level frame has the same restriction as the iframe. It has COEP so it cannot do new embedding, it has the same origin so it cannot do extra fetch, etc.
 * In the other direction, b.com can read a.com if the Permissions-Policy is delegated to the iframe. No inheritance mechanism is planned for opened popups. For this reason we explicitely disable crossOriginIsolated permission on all freshly opened popups.
@@ -48,6 +52,8 @@ Finally, a note about the following situation:
 
 ![image](../resources/coop_inheritance_coep_2.jpg)  
 _COEP gets inherited to the popup although only the iframe set it and its top-level document did not. The iframe is NOT crossOriginIsolated._
+
+</br>
 
 We've simplified the COOP value in the drawings. In reality it is augmented with COEP when it is received from the network, and used alone in the COOP algorithm. In the above picture it still works as intended, because we're inheriting COOP: "restrict-properties" and not "restrict-properties+COEP".
 
