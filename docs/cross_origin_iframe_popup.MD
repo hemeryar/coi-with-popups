@@ -13,14 +13,14 @@ For COOP: restrict-properties to work, we need:
 
 <br>
 
-We do not currently inherit COOP or use noopener for two reasons:
-* It would mix the origin, inherited from the iframe, with the COOP value, inherited from the top-level document.
-* An initial empty documents from a different origin in the same browsing context group, if crossOriginIsolated, could read the top-level origin, bypassing the PermissionsPolicy that might have been set on the iframe.
+We do not currently inherit COOP because it would mix the origin, inherited from the iframe, with the COOP value, inherited from the top-level document.
 
 ![image](../resources/coop_inheritance_issue.jpg)  
 _By simply inheriting, we break COOP. In this example, everything lives in the same process, which should never be allowed._
 
 <br>
+
+We use noopener because an initial empty documents from a different origin in the same browsing context group, if crossOriginIsolated, could read the top-level origin, bypassing the PermissionsPolicy that might have been set on the iframe.
 
 ![image](../resources/coop_inheritance_permission_bypass.jpg)  
 _By not using noopener, we've allowed the iframe to exploit crossOriginIsolated APIs, bypassing the PermissionsPolicy set by the embedder._
@@ -45,16 +45,16 @@ _By supplementing COOP with the setting origin, we are able to correctly separat
     * We would lose synchronous scripting between the iframe and the newly opened document, this probably needs more metrics to know if it is acceptable.
 
 ## Details about crossOriginIsolated origin mix
-Some more details about the crossOriginIsolated restriction for pages with mismatched origins and COOP origins:
+We also wanted to add some details about the crossOriginIsolated APIs restriction for pages with mismatched COOP origin and origin. Below are all the different inherited pieces of the puzzle:
 
 ![image](../resources/coop_inheritance_coep_1.jpg)  
 _COOP is inherited from the top-level opener browsing context. COEP gets passed to the initial empty document because the iframe set it. crossOriginIsolated permission is none because COOP origin and origin do not match._
 
 </br>
 
-In the example above, we have multiple top-level origin documents in a BrowsingContext group that is crossOriginIsolated. We believe this is fine:
+In this example, we have documents with different top-level origins in a BrowsingContext group that is crossOriginIsolated. This was not initially possible, but we believe this is fine:
 * Anything that the iframe does is readable by a.com. This is fine because b.com agreed to that by setting COEP. The fresh popup is required to be in-process, and anything done in there can be read by a.com. A.com cannot get any extra information, because the top-level frame behaves like the iframe. It has COEP so it cannot do new embedding, it has the same origin so it cannot do extra fetches, etc.
-* In the other direction, b.com can read a.com if the Permissions-Policy is delegated to the iframe. No inheritance mechanism is planned for opened popups. For this reason we explicitely disable crossOriginIsolated permission on all freshly opened popups.
+* In the other direction, b.com can read a.com if the Permissions-Policy is delegated to the iframe. Permissions-Policy is not inherited. For this reason we explicitely disable crossOriginIsolated permission on all freshly opened popups, as it would otherwise default to `allow`.
 * COOP invariants about top-level origins become invariants about top-level COOP origins. The only case where a page can have a COOP origin not equal to its actual origin is the initial empty document.
 
 </br>
