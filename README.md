@@ -44,7 +44,7 @@ For pages to get `crossOriginIsolated` today, we require that `COOP: same-origin
 * **construct.com**, an online game engine needs javascript threading for performance, but uses another domain for renderer game-preview popups.
 
 ## Underlying Issue
-*In this explainer, we call _document_ what is rendered by any individual frame. A _page_ contains the top level document, as well as all of its iframe documents, if any. When you open a popup, you get a second page.*
+*Note: In this explainer, we call _document_ what is rendered by any individual frame. A _page_ contains the top level document, as well as all of its iframe documents, if any. When you open a popup, you get a second page.*
 
 Because of [Spectre](https://spectreattack.com/), OS processes are now the only strong security boundary. `crossOriginIsolated` makes Spectre easier to exploit via powerful APIs, so we need to be able to put `crossOriginIsolated` pages that in their own process. To be able to honor that, we used the spec concept of BrowsingContext groups.
 
@@ -95,7 +95,7 @@ _With COOP, we use two different BrowsingContext groups. The main page and the p
 Instead of completely removing scripting capabilities between two pages, we would like to only restrict synchronous access, which is more precisely what requires pages to be in the same process.
 
 ![image](resources/coop_rp_solution.jpg)  
-_The basic idea of the COOP: restrict-properties idea would be to use a single BrowsingContext group, but to increase the keying of Agent Cluster, to have multiple same-origin documents not be able to synchronously script each other. This would allow for asynchronous communication without synchronous communication._
+_The basic `COOP: restrict-properties` idea would be to use a single BrowsingContext group, but to increase the keying of Agent Cluster. We would have multiple same-origin documents not be able to synchronously script each other, despite being able to reach each other's `Window` object._
 
 </br>
 
