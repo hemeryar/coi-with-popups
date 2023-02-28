@@ -17,11 +17,13 @@ https://github.com/whatwg/html/issues/6364
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Terminology](#terminology)
-- [Why does crossOriginIsolated require COOP: same-origin](#why-does-crossoriginisolated-require-coop-same-origin)
-- [The COOP: restrict-properties proposal](#the-coop-restrict-properties-proposal)
-- [Fitting COOP: restrict-properties into current algorithm](#fitting-coop-restrict-properties-into-current-algorithm)
-- [Extra requirements for common use cases](#extra-requirements-for-common-use-cases)
+- [Why do we need crossOriginIsolated + popups](#why-do-we-need-crossoriginisolated--popups)
+  - [Blocked use cases](#blocked-use-cases)
+  - [Underlying Issue](#underlying-issue)
+- [Alternative approaches](#alternative-approaches)
+  - [The COOP: restrict-properties proposal](#the-coop-restrict-properties-proposal)
+  - [Fitting COOP: restrict-properties into current algorithm](#fitting-coop-restrict-properties-into-current-algorithm)
+  - [Extra requirements for common use cases](#extra-requirements-for-common-use-cases)
 - [Security considerations](#security-considerations)
   - [Same-origin policy](#same-origin-policy)
   - [Cross-origin subframes opening popup](#cross-origin-subframes-opening-popup)
