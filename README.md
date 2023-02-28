@@ -35,6 +35,14 @@ https://github.com/whatwg/html/issues/6364
 
 # Introduction and problematics
 
+## User needs
+For pages to get `crossOriginIsolated` today, we require that `COOP: same-origin` be set. This effectively prevents any interaction with third-party popups. This is problematic for an important variety of use cases, below are a few real world example:
+
+* **gmail.com** wants to do memory measurement to diagnose performance. Some emails contain meet.com iframes which open a meeting when interacted with.
+* **zoom.com** wants to use `sharedArrayBuffers` to reduce the copying of media data. It needs to support being opened from third-party apps, via an SDK.
+* **perfetto.dev**, a trace visualization app, would like to use a more accurate `performance.now()` to improve performance. They use third-party popups to display traces without having them sent to their server.
+* **construct.com**, an online game engine needs javascript threading for performance, but uses another domain for renderer game-preview popups.
+
 ## Terminology
 In this explainer, we call _document_ what is rendered by any individual frame. A _page_ contains the top level document, as well as all of its iframe documents, if any. When you open a popup, you get a second page.
 
