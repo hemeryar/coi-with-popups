@@ -47,4 +47,4 @@ _Instead of clearing window.name, we link it to the browsing context group that 
 
 <br>
 
-With this solution, we preserve legitimate use cases, and only need to manually block named targetting across browsing context groups whch result in a navigation. Note that this mechanism could also be used for browsing context groups swaps to another COOP group, and to help restore names on back navigation for example.
+With this solution, we preserve legitimate use cases. We still need to block named targetting which result in a navigation in a window in another browsing context group. Note that this mechanism could also be used for browsing context groups swaps to another COOP group, and to help restore names on back navigation for example.
