@@ -1,6 +1,6 @@
-# Cross-Origin isolation with popups (Work in Progress)
+# Cross-Origin isolation with popups
 
-This repository is dedicated to finding solutions to the cross-origin isolation with popups problem.
+This repository is dedicated to solve the problem of interacting with third party popups in a crossOriginIsolated context.
 
 Currently for a document to be `crossOriginIsolated`, we need a `Cross-Origin-Opener-Policy: same-origin` header, and `Cross-Origin-Embedder-Policy: require-corp` or `credentialless` header. The `COOP` value prevents any interaction with cross-origin popups.
 
