@@ -14,7 +14,7 @@ _Because the property is linked to the window and not the document, this can be 
 
 <br>
 
-It is commonly used for named targetting, which is specifying a string as the "target" of an anchor tag, a `window.open()` parameter, etc. to navigate that target, or retrieve a window handle to it. This also has its own problems, because we do not want a regular page to be able to navigate a crossOriginIsolated page ever. Named targeting resulting in navigations are therefore completely prohibited between browsing context groups. On the other hand, there is no reason why we should not allow for window handle retrieval.
+It is commonly used for named targetting, which is specifying a string as the "target" of an anchor tag, a `window.open()` parameter, etc. to navigate that target, or retrieve a window handle to it. This also has its own problems, because we do not want a regular page to be able to navigate a crossOriginIsolated page ever. Named targeting resulting in navigations are therefore completely prohibited between browsing context groups. Window retrieval is similarly not permitted because it would be an XS Leak vector, and many queries could be used to guess a window's name.
 
 <br>
 
